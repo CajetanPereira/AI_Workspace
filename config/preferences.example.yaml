@@ -1,0 +1,50 @@
+# Your job-search preferences. Copy to config/preferences.yaml and edit.
+# These drive the search queries and the relevance ranking.
+
+# Job titles / roles you're targeting (used as search keywords)
+titles:
+  - "Software Engineer"
+  - "Backend Developer"
+  - "Python Developer"
+
+# Skills/keywords that should boost a job's relevance score
+keywords:
+  - python
+  - fastapi
+  - aws
+  - postgresql
+
+# Hard filters — jobs failing these are dropped before ranking
+filters:
+  locations:
+    - "Bengaluru"
+    - "Remote"
+  remote_ok: true
+  min_salary_lpa: 12          # India: lakhs per annum; null to ignore
+  experience_years: 3         # your years of experience
+  exclude_keywords:           # drop postings containing any of these
+    - "unpaid"
+    - "internship"
+  posted_within_days: 14      # only jobs posted in the last N days
+
+# Per-platform search settings
+platforms:
+  linkedin:
+    enabled: true
+    easy_apply_only: true     # only collect LinkedIn "Easy Apply" jobs (assisted-apply works on these)
+    use_recommended: false    # true = scrape LinkedIn's profile-matched "Top job picks" feed
+                              #        instead of keyword search (titles/keywords below ignored for search)
+    max_results: 50
+  naukri:
+    enabled: true
+    max_results: 50
+
+# Ranking
+ranking:
+  min_score_to_show: 60       # 0-100; hide jobs below this in the dashboard
+  auto_tailor_top_n: 10       # generate tailored resume/cover letter for top N approved jobs
+
+# Apply behavior (semi-auto: tool pre-fills, you submit)
+apply:
+  mode: "assist"              # "assist" = pre-fill + pause for your click; "manual" = open page only
+  daily_limit: 20             # safety cap on applications prepared per day
