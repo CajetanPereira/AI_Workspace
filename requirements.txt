@@ -1,0 +1,22 @@
+# Core
+playwright==1.49.0          # browser automation (search + assisted apply)
+sqlmodel==0.0.22            # ORM over SQLite
+pydantic==2.10.4
+pydantic-settings==2.7.0
+typer==0.15.1              # CLI
+click==8.1.8               # pinned: typer 0.15 is incompatible with click>=8.2
+rich==13.9.4               # pretty CLI output
+pyyaml==6.0.2
+
+# Resume parsing
+pypdf==5.1.0               # PDF text extraction
+python-docx==1.1.2         # .docx text extraction
+
+# LLM
+anthropic==0.42.0          # Claude API (matching + tailoring)
+
+# Web dashboard
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+jinja2==3.1.5
+python-multipart==0.0.20

@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Secrets & local config
+.env
+config/preferences.yaml
+
+# Data / runtime
+*.db
+*.sqlite3
+data/
+browser_profiles/          # persisted Playwright sessions (contain your logged-in cookies!)
+output/                    # generated resumes / cover letters
+
+# Resumes (personal data)
+resumes/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jobapply"
+version = "0.1.0"
+description = "Semi-automated job search & assisted-apply tool (LinkedIn, Naukri)."
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+
+[project.scripts]
+jobapply = "jobapply.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
