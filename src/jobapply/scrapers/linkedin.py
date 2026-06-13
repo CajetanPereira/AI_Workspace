@@ -93,7 +93,9 @@ class LinkedInScraper(BaseScraper):
                     card.click()
                     human_pause(1.5, 3)
 
-                    title = self._text(page, "h1.job-details-jobs-unified-top-card__job-title, .jobs-unified-top-card__job-title")
+                    # The class is on the container <div>, the title is the <h1> inside it
+                    # (hence no "h1." prefix); fall back to a bare h1 if the class drifts.
+                    title = self._text(page, ".job-details-jobs-unified-top-card__job-title, .jobs-unified-top-card__job-title, h1")
                     company = self._text(page, ".job-details-jobs-unified-top-card__company-name, .jobs-unified-top-card__company-name")
                     location = self._text(page, ".job-details-jobs-unified-top-card__bullet, .jobs-unified-top-card__bullet")
                     desc = self._text(page, "#job-details, .jobs-description__content")

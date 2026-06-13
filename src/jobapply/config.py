@@ -21,9 +21,21 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
 
+    # LLM provider: "gemini" (free tier) or "anthropic" (paid Claude).
+    llm_provider: str = Field(default="gemini", alias="LLM_PROVIDER")
+
+    # Anthropic / Claude
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
     claude_model: str = Field(default="claude-opus-4-8", alias="CLAUDE_MODEL")
+
+    # Google Gemini (free key at https://aistudio.google.com/apikey)
+    gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
+    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
+
     database_url: str = Field(default=f"sqlite:///{DATA_DIR / 'jobs.db'}", alias="DATABASE_URL")
+    # Browser to drive: "msedge" or "chrome" use your installed system browser
+    # (recommended on Windows); "" uses Playwright's bundled Chromium.
+    browser_channel: str = Field(default="msedge", alias="BROWSER_CHANNEL")
 
 
 # ---- preferences.yaml schema ----

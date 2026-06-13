@@ -13,8 +13,10 @@ config/preferences.yaml
 *.db
 *.sqlite3
 data/
-browser_profiles/          # persisted Playwright sessions (contain your logged-in cookies!)
-output/                    # generated resumes / cover letters
+# persisted Playwright sessions (contain your logged-in cookies!)
+browser_profiles/
+# generated resumes / cover letters / screenshots
+output/
 
 # Resumes (personal data)
 resumes/

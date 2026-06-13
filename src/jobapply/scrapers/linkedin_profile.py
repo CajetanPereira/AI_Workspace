@@ -13,34 +13,21 @@ from .base import human_pause
 
 
 def _find_own_profile_url(page) -> str:
-    """Discover the signed-in user's profile URL from the global nav 'Me' link."""
+    """Discover the signed-in user's profile URL.
+
+    LinkedIn's class names are obfuscated/hashed, but the left-rail identity card
+    on the feed is always the FIRST `/in/<handle>` link on the page — that's you.
+    """
     page.goto("https://www.linkedin.com/feed/")
-    human_pause(2, 4)
+    human_pause(3, 5)
 
-    # The left-rail profile card and the "Me" photo both link to /in/<handle>/.
-    candidates = [
-        "a.profile-card-profile-picture-container",          # left-rail card
-        "a[href*='/in/'].ember-view",
-        ".feed-identity-module a[href*='/in/']",
-        "a.global-nav__me-photo",                            # opens menu; href may be /in/
-    ]
-    for sel in candidates:
-        loc = page.locator(sel)
-        if loc.count():
-            href = loc.first.get_attribute("href") or ""
-            if "/in/" in href:
-                return href if href.startswith("http") else "https://www.linkedin.com" + href
-
-    # Fallback: open the Me menu and read the "View Profile" link.
-    me = page.locator("button.global-nav__primary-link-me-menu-trigger, .global-nav__me")
-    if me.count():
-        me.first.click()
-        human_pause(1, 2)
-        view = page.locator("a:has-text('View Profile'), a:has-text('View profile')")
-        if view.count():
-            href = view.first.get_attribute("href") or ""
-            if href:
-                return href if href.startswith("http") else "https://www.linkedin.com" + href
+    hrefs = page.eval_on_selector_all(
+        "a[href*='/in/']",
+        "els => els.map(e => e.getAttribute('href')).filter(Boolean)",
+    )
+    if hrefs:
+        href = hrefs[0].split("?")[0]
+        return href if href.startswith("http") else "https://www.linkedin.com" + href
 
     raise RuntimeError(
         "Couldn't locate your profile URL. Are you logged in? "
