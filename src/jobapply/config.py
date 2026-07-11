@@ -63,8 +63,13 @@ class Ranking(BaseModel):
 
 
 class ApplyConfig(BaseModel):
-    mode: str = "assist"   # "assist" | "manual"
+    mode: str = "assist"          # "assist" | "manual"
     daily_limit: int = 20
+    auto_submit: bool = True      # actually submit the application on the site
+    resume_path: str = ""         # PDF used for Easy Apply upload steps
+    # Standard screening answers used to fill application questions deterministically.
+    # Keys are matched (case-insensitively, substring) against the question label.
+    answers: dict[str, str] = {}
 
 
 class Preferences(BaseModel):

@@ -1,17 +1,19 @@
 """Minimal FastAPI review dashboard.
 
-Shows ranked jobs, lets you approve/reject, trigger tailoring, and read the
-generated cover letter. Apply is still driven from the CLI (`jobapply apply`)
-because it needs a visible browser + your manual submit.
+Shows ranked jobs, lets you approve/reject, tailor, and AUTO-APPLY. Clicking Apply
+launches a background worker that opens the job in your logged-in browser and drives
+the real apply flow to submission (see apply.auto_apply).
 """
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlmodel import select
 
+from .apply import auto_apply
 from .db import get_session, init_db
 from .models import Application, ApplicationStatus, Job
 from .tailoring import tailor_job
@@ -73,7 +75,8 @@ PAGE = """
  .actions form{{display:inline}}
  button{{cursor:pointer;font-size:.78rem;font-weight:600;border-radius:8px;padding:.4rem .7rem;
          margin-right:.3rem;border:1px solid transparent;transition:.15s}}
- .btn-approve{{background:var(--green);color:#fff}} .btn-approve:hover{{background:var(--green-dark)}}
+ .btn-apply{{background:var(--green-dark);color:#fff}} .btn-apply:hover{{background:#166534}}
+ .btn-approve{{background:#fff;color:var(--green-dark);border-color:#bbf7d0}} .btn-approve:hover{{background:var(--green-tint)}}
  .btn-reject{{background:#fff;color:#dc2626;border-color:#fecaca}} .btn-reject:hover{{background:#fef2f2}}
  .btn-tailor{{background:#fff;color:var(--green-dark);border-color:#bbf7d0}} .btn-tailor:hover{{background:var(--green-tint)}}
  .cover{{display:inline-block;margin-top:.4rem;font-size:.78rem;color:var(--green-dark);text-decoration:none}}
@@ -105,9 +108,10 @@ ROW = """
  <td><span class="score {cls}">{score}</span></td>
  <td><a class="title" href="{url}" target="_blank">{title}</a>{badges}</td>
  <td>{company}</td><td>{location}</td>
- <td><span class="pill st-{status}">{status}</span></td>
+ <td><span class="pill st-{status}" title="{note}">{status}</span></td>
  <td class="why">{reasons}</td>
  <td class="actions">
+  <form method="post" action="/apply/{id}"><button class="btn-apply">✈ Apply</button></form>
   <form method="post" action="/approve/{id}"><button class="btn-approve">✓ Approve</button></form>
   <form method="post" action="/reject/{id}"><button class="btn-reject">✕ Reject</button></form>
   <form method="post" action="/tailor/{id}"><button class="btn-tailor">✎ Tailor</button></form>
@@ -144,6 +148,8 @@ def index(min_score: int = 0):
         cover = ""
         if app_row and app_row.cover_letter_path:
             cover = f'<a class="cover" href="/cover/{j.id}" target="_blank">📄 cover letter</a>'
+        note = (app_row.notes if app_row else "") or ""
+        note = note.replace('"', "'")  # keep the title attribute valid
         badges = f'<span class="badge b-{j.platform}">{j.platform}</span>'
         if j.easy_apply:
             badges += '<span class="badge b-easy">easy</span>'
@@ -151,7 +157,7 @@ def index(min_score: int = 0):
             id=j.id, score=j.score if j.score is not None else "—", cls=_cls(j.score),
             url=j.url, title=j.title or "(untitled)", badges=badges,
             company=j.company, location=j.location, status=j.status.value,
-            reasons=j.score_reasons or "", cover=cover,
+            reasons=j.score_reasons or "", cover=cover, note=note,
         ))
 
     body = "\n".join(rows) if rows else EMPTY_ROW
@@ -178,6 +184,14 @@ def reject(job_id: int):
 @app.post("/tailor/{job_id}")
 def tailor(job_id: int):
     tailor_job(job_id)
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/apply/{job_id}")
+def apply(job_id: int):
+    # Run the real apply flow in a background thread so the request returns immediately
+    # and a visible browser can drive the submission on your desktop.
+    threading.Thread(target=auto_apply, args=(job_id,), daemon=True).start()
     return RedirectResponse("/", status_code=303)
 
 

@@ -44,7 +44,24 @@ ranking:
   min_score_to_show: 60       # 0-100; hide jobs below this in the dashboard
   auto_tailor_top_n: 10       # generate tailored resume/cover letter for top N approved jobs
 
-# Apply behavior (semi-auto: tool pre-fills, you submit)
+# Apply behavior
 apply:
-  mode: "assist"              # "assist" = pre-fill + pause for your click; "manual" = open page only
-  daily_limit: 20             # safety cap on applications prepared per day
+  mode: "assist"
+  daily_limit: 20             # safety cap on applications submitted per day
+  auto_submit: true           # true = actually submit on the site; false = stop before Submit
+  resume_path: ""             # e.g. "C:/Users/you/resume.pdf" — used for Easy Apply upload steps
+
+  # Standard answers used to fill screening questions automatically.
+  # The question label is matched (case-insensitive substring) against these keys.
+  # If a REQUIRED question can't be answered from here (or the profile), the job is
+  # left "prepared" with a note instead of submitting a wrong answer.
+  answers:
+    "years of experience": "6"
+    "notice period": "30 days"
+    "current ctc": "12 LPA"
+    "expected ctc": "18 LPA"
+    "authorized to work": "Yes"
+    "require sponsorship": "No"
+    "willing to relocate": "Yes"
+    "phone": ""               # falls back to your profile phone if blank
+    "city": "Mumbai"
